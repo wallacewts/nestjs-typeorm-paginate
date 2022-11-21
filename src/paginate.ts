@@ -212,17 +212,14 @@ async function paginateQueryBuilder<T, CustomMetaType = IPaginationMeta>(
     resolveOptions(options);
 
   const promises: [Promise<T[]>, Promise<number> | undefined] = [
-    (PaginationTypeEnum.LIMIT_AND_OFFSET === paginationType
-      ? queryBuilder.limit(limit).offset((page - 1) * limit)
-      : queryBuilder.take(limit).skip((page - 1) * limit)
-    )
+    queryBuilder.take(limit).skip((page - 1) * limit)
       .cache(cacheOption)
       .getMany(),
     undefined,
   ];
 
   if (countQueries) {
-    promises[1] = countQuery(queryBuilder, cacheOption);
+    promises[1] = queryBuilder.getCount();
   }
 
   const [items, total] = await Promise.all(promises);
